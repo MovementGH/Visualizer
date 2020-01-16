@@ -1,5 +1,7 @@
 #ifndef Util_h
 #define Util_h
+#include <random>
+#include <functional>
 #include <SFML/Graphics.hpp>
 #include "../SelbaWard/SelbaWard.hpp"
 
@@ -44,6 +46,35 @@ namespace selbaward {
 
         sf::Vector3f m_Size;
         std::vector<sw::Sprite3d> m_Shapes;
+    };
+    class WarpField : public sf::Drawable, public sf::Transformable {
+        public:
+        WarpField();
+
+        void reset();
+        void setSize(sf::Vector2f Size);
+        void setStarCount(unsigned int StarCount);
+
+        void setColor(sf::Color Color);
+
+        void move(float Distance);
+
+        protected:
+        inline float random(float Low,float High);
+        virtual void draw(sf::RenderTarget& Target,sf::RenderStates States) const;
+
+        std::vector<sf::Vector2f> m_StarMovementSpeed;
+        std::vector<float> m_StarAlpha,m_StarMaxAlpha,m_StarMA;
+        std::vector<bool> m_StarMovingRight,m_StarMovingDown;
+        
+        sf::Vector2f m_Size;
+        sf::Color m_Color;
+
+        std::vector<sf::Vertex> m_Vertices;
+
+        std::mt19937 m_RandomGenerator;
+        std::uniform_int_distribution<unsigned short> m_RandomDistribution;
+        std::function <unsigned short int()> m_Random;
     };
 }
 #endif

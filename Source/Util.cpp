@@ -1,4 +1,5 @@
 #include "Util.hpp"
+#include <iostream>
 namespace selbaward {
     Hexahedron::Hexahedron(sf::Vector3f Size,int Depth):m_Size(Size) {
         m_Shapes.resize(4);
@@ -67,5 +68,76 @@ namespace selbaward {
     }
     bool Hexahedron::isInRange(float Number,float UpperBound,float LowerBound) {
         return LowerBound<Number&&Number<UpperBound;
+    }
+
+    WarpField::WarpField():
+        m_RandomDistribution(1,255) {
+        std::random_device Device;
+        m_RandomGenerator.seed(Device());
+        m_Random=std::bind(m_RandomDistribution,m_RandomGenerator);
+    }
+    void WarpField::move(float Distance) {
+        float FadeAmount=1+(0.003*Distance);
+        std::size_t StarCount=m_Vertices.size();
+        for(int i=0;i<StarCount;i++) {
+            if(m_StarAlpha[i]<m_StarMaxAlpha[i])
+                m_StarAlpha[i]*=FadeAmount,
+                m_Vertices[i].color.a=m_StarAlpha[i],
+                m_StarMA[i]=m_Vertices[i].color.a*Distance;
+            m_Vertices[i].position.x+=(m_StarMovingRight[i]?-m_StarMA[i]:m_StarMA[i])*m_StarMovementSpeed[i].x;
+            m_Vertices[i].position.y+=(m_StarMovingDown[i]?-m_StarMA[i]:m_StarMA[i])*m_StarMovementSpeed[i].y;
+            m_StarMovementSpeed[i]*=1.003f;
+            if(m_Vertices[i].position.x<0||m_Vertices[i].position.x>m_Size.x||m_Vertices[i].position.y<0||m_Vertices[i].position.y>m_Size.y)
+                m_StarMovementSpeed[i].x=random(0.00004,0.006),
+                m_StarMovementSpeed[i].y=0.006-m_StarMovementSpeed[i].x,
+                m_Vertices[i].position.x=m_Size.x/2+random(-1,1),
+                m_Vertices[i].position.y=m_Size.y/2+random(-1,1),
+                m_Vertices[i].color.a=0,
+                m_StarMovingRight[i]=m_Vertices[i].position.x<m_Size.x/2,
+                m_StarMovingDown[i]=m_Vertices[i].position.y<m_Size.y/2,
+                m_StarAlpha[i]=2.55,
+                m_StarMaxAlpha[i]=250;
+        }
+    }
+    void WarpField::reset() {
+        for(int i=0;i<m_Vertices.size();i++) {
+            m_Vertices[i].position={random(0.f,m_Size.x),random(0.f,m_Size.y)};
+            m_Vertices[i].color=m_Color;
+            float MoveEffect=pow(1.002,sqrt(pow(m_Vertices[i].position.x-m_Size.x/2,2)+pow(m_Vertices[i].position.y-m_Size.y/2,2)));
+            m_StarMovementSpeed[i].x=random(0.00004,0.006);
+            m_StarMovementSpeed[i].y=0.006-m_StarMovementSpeed[i].x;
+            m_StarMovementSpeed[i]*=MoveEffect;
+            m_StarMaxAlpha[i]=250;
+            m_StarAlpha[i]=std::min(2.55f*MoveEffect,m_StarMaxAlpha[i]);
+            m_Vertices[i].color.a=m_StarAlpha[i];
+            m_StarMovingRight[i]=m_Vertices[i].position.x<m_Size.x/2;
+            m_StarMovingDown[i]=m_Vertices[i].position.y<m_Size.y/2;
+        }
+    }
+    void WarpField::setSize(sf::Vector2f Size) {
+        m_Size=Size;
+        reset();
+    }
+    void WarpField::setStarCount(unsigned StarCount) {
+        m_Vertices.resize(StarCount);
+        m_StarMovementSpeed.resize(StarCount);
+        m_StarAlpha.resize(StarCount);
+        m_StarMaxAlpha.resize(StarCount);
+        m_StarMovingRight.resize(StarCount);
+        m_StarMovingDown.resize(StarCount);
+        m_StarMA.resize(StarCount,100);
+        reset();
+    }
+    void WarpField::setColor(sf::Color Color) {
+        m_Color=Color;
+        for(auto& Vertex:m_Vertices)
+            Vertex.color={Color.r,Color.g,Color.b,Vertex.color.a};
+    }
+    void WarpField::draw(sf::RenderTarget& Target,sf::RenderStates States) const {
+        States.transform*=getTransform();
+        if(m_Vertices.size()>0) Target.draw(&m_Vertices.front(),m_Vertices.size(),sf::Points,States);
+    }
+    float WarpField::random(float Low,float High) {
+        return std::uniform_real_distribution<float>{Low,High}(m_RandomGenerator);
     }
 }

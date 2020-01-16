@@ -7,13 +7,15 @@
 #include <valarray>
 #include "Util.hpp"
 
-struct VisualizerPluginSettings {
-    VisualizerPluginSettings(int InputChannel,float InputVolume,sf::FloatRect DisplayPosition,float DisplayRotation);
-    int inputChannel;
-    float inputVolume;
-
-    sf::FloatRect displayPosition;
-    float displayRotation;
+struct VisualizerPluginInputSettings {
+    VisualizerPluginInputSettings(int Channel,float Volume);
+    int channel;
+    float volume;
+};
+struct VisualizerPluginDisplaySettings {
+    VisualizerPluginDisplaySettings(sf::FloatRect Position,float Rotation);
+    sf::FloatRect position;
+    float rotation;
 };
 class VisualizerPlugin {
     public:
@@ -144,6 +146,7 @@ namespace Plugin {
         sf::Color m_Color;
 
         std::vector<sf::Int16> m_Samples;
+        std::vector<float> m_HanningCache;
 
         sf::VertexArray m_Line;
     };
@@ -166,6 +169,7 @@ namespace Plugin {
 
         std::complex<float> m_Even,m_Temp;
         std::vector<sf::Int16> m_Samples;
+        std::vector<float> m_HanningCache;
         std::vector<std::complex<float>> m_TempV,m_HanningSamples;
         std::vector<std::vector<std::complex<float>>> m_Polars;
 

@@ -6,7 +6,7 @@ void Visualizer::render() {
     m_Texture.clear(sf::Color::Black);
     for(int i=0;i<m_Plugins.size();i++) {
         m_Plugins[i]->render(ElapsedTime);
-        m_Texture.draw(m_PluginSprites[i]);
+        for(int i2=0;i2<m_PluginSprites[i].size();i2++) m_Texture.draw(m_PluginSprites[i][i2]);
     }
     m_Texture.display();
 }
@@ -25,7 +25,7 @@ void Visualizer::setOutputSize(sf::Vector2u Size,float Rotation,float Scaling) {
 void Visualizer::inputSamples(std::vector<sf::Int16> Samples) {
     std::vector<sf::Int16> ModifiedSamples(Samples.size()/m_ChannelCount);
     for(int i=0;i<m_Plugins.size();i++) {
-        for(int i2=m_PluginSettings[i].inputChannel,i3=0;i2<Samples.size();i2+=m_ChannelCount,i3++) ModifiedSamples[i3]=Samples[i2]*m_PluginSettings[i].inputVolume;
+        for(int i2=m_InputSettings[i].channel,i3=0;i2<Samples.size();i2+=m_ChannelCount,i3++) ModifiedSamples[i3]=Samples[i2]*m_InputSettings[i].volume;
         m_Plugins[i]->inputSamples(ModifiedSamples);
     }
 }
@@ -33,17 +33,26 @@ void Visualizer::setStreamProperties(int SampleRate,int ChannelCount) {
     m_SampleRate=SampleRate;
     m_ChannelCount=ChannelCount;
 }
-void Visualizer::addPlugin(VisualizerPlugin* Plugin,VisualizerPluginSettings Settings) {
-    sf::Sprite PluginSprite;
-    Plugin->setRenderSize({(uint)Settings.displayPosition.width,(uint)Settings.displayPosition.height});
+void Visualizer::addPlugin(VisualizerPlugin* Plugin,VisualizerPluginInputSettings Input,std::vector<VisualizerPluginDisplaySettings> Display) {
+    sf::Vector2u LargestRender(0,0);
+    for(int i=0;i<Display.size();i++) {
+        if(Display[i].position.width>LargestRender.x) LargestRender.x=Display[i].position.width;
+        if(Display[i].position.height>LargestRender.y) LargestRender.y=Display[i].position.height;
+    }
+    Plugin->setRenderSize(LargestRender);
     Plugin->setStreamProperties(m_SampleRate,m_ChannelCount);
-    PluginSprite.setTexture(Plugin->getTexture());
-    PluginSprite.setPosition(Settings.displayPosition.left+Settings.displayPosition.width/2,Settings.displayPosition.top+Settings.displayPosition.height/2);
-    PluginSprite.setOrigin(Settings.displayPosition.width/2,Settings.displayPosition.height/2);
-    PluginSprite.setRotation(Settings.displayRotation);
     m_Plugins.push_back(Plugin);
-    m_PluginSettings.push_back(Settings);
-    m_PluginSprites.push_back(PluginSprite);
+    m_PluginSprites.push_back(std::vector<sf::Sprite>(Display.size()));
+    std::vector<sf::Sprite>& PluginSprites=m_PluginSprites[m_PluginSprites.size()-1];
+    for(int i=0;i<Display.size();i++) {
+        PluginSprites[i].setTexture(Plugin->getTexture());
+        PluginSprites[i].setTextureRect({0,0,LargestRender.x,LargestRender.y});
+        PluginSprites[i].setScale((float)Display[i].position.width/(float)LargestRender.x,(float)Display[i].position.height/(float)LargestRender.y);
+        PluginSprites[i].setOrigin(LargestRender.x/2,LargestRender.y/2);
+        PluginSprites[i].setRotation(Display[i].rotation);
+        PluginSprites[i].setPosition(Display[i].position.left+Display[i].position.width/2,Display[i].position.top+Display[i].position.height/2);
+    }
+    m_InputSettings.push_back(Input);
 }
 const sf::Texture& Visualizer::getTexture() { return m_Texture.getTexture(); }
 

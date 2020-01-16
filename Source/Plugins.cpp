@@ -1,11 +1,7 @@
 #include "Plugins.hpp"
 
-VisualizerPluginSettings::VisualizerPluginSettings(int InputChannel,float InputVolume,sf::FloatRect DisplayPosition,float DisplayRotation){
-    inputChannel=InputChannel;
-    inputVolume=InputVolume;
-    displayPosition=DisplayPosition;
-    displayRotation=DisplayRotation;
-}
+VisualizerPluginInputSettings::VisualizerPluginInputSettings(int Channel,float Volume):channel(Channel),volume(Volume){}
+VisualizerPluginDisplaySettings::VisualizerPluginDisplaySettings(sf::FloatRect Position,float Rotation):position(Position),rotation(Rotation){}
 
 VisualizerPlugin::VisualizerPlugin() {}
 void VisualizerPlugin::render(sf::Time ElapsedTime) {}
@@ -241,12 +237,15 @@ namespace Plugin {
         m_Color(Color),m_Width(Width),m_UsingSamples(false) {
         m_Line.setPrimitiveType(sf::LineStrip);
         m_Line.resize(m_Width);
+        m_HanningCache.resize(m_Width);
+        for(int i=0;i<m_Width;i++)
+            m_HanningCache[i]=(0.54f-0.46f*cos(2*M_PI*i/(float)m_Width));
     }
     void Hanning::render(sf::Time ElapsedTime) {
         while(m_UsingSamples) sf::sleep(sf::seconds(0.001));
         m_UsingSamples=true;
         if(m_Samples.size()<m_Width) m_Samples.resize(m_Width,0);
-        for(int i=0;i<m_Width;i++) m_Line[i]={{(float)(i*m_Texture.getSize().x)/(float)m_Width+.5f,(m_Texture.getSize().y/2)+(float)(m_Samples[i]*(0.54f-0.46f*cos(2*M_PI*i/(float)m_Width))*m_Texture.getSize().y/2)/32768.f+.5f},m_Color};
+        for(int i=0;i<m_Width;i++) m_Line[i]={{(float)(i*m_Texture.getSize().x)/(float)m_Width+.5f,(m_Texture.getSize().y/2)+(float)(m_Samples[i]*m_HanningCache[i]*m_Texture.getSize().y/2)/32768.f+.5f},m_Color};
         m_Samples.erase(m_Samples.begin(),m_Samples.begin()+std::min((float)m_Samples.size(),m_SampleRate*ElapsedTime.asSeconds()));
         m_UsingSamples=false;
         m_Texture.clear(sf::Color::Transparent);
@@ -265,10 +264,13 @@ namespace Plugin {
         m_Bars.setPrimitiveType(sf::Lines);
         m_HanningSamples.resize(m_Width);
         m_TempV.resize(m_Width/2);
-        m_Polars.resize(log2(m_Width),{m_Width/2});
-        for(int i=0;i<m_Polars.size();i++)
-            for(int i2=0;i2<m_Polars[i].size();i2++)
+        m_Polars.resize(log2(m_Width),std::vector<std::complex<float>>(m_Width/2));
+        for(int i=0;i<log2(m_Width);i++)
+            for(int i2=0;i2<m_Width/2;i2++)
                 m_Polars[i][i2]=(exp(std::complex<float>(0,-2*M_PI/(pow(2,i+1))*i2)));
+        m_HanningCache.resize(m_Width);
+        for(int i=0;i<m_Width;i++)
+            m_HanningCache[i]=(0.54f-0.46f*cos(2*M_PI*i/(float)m_Width));
     }
 
     void Pitch::Sort(std::complex<float>* Samples,int SampleCount) {
@@ -284,7 +286,7 @@ namespace Plugin {
             FFT(&Samples[0]+SampleCount,SampleCount,SampleCountLogarithm-1);
             for(int i=0;i<SampleCount;i++) {
                 m_Even=Samples[i];
-                m_Temp=(exp(std::complex<float>(0,-2*M_PI/(pow(2,SampleCountLogarithm))*i)))*Samples[i+SampleCount];
+                m_Temp=m_Polars[SampleCountLogarithm-1][i]*Samples[i+SampleCount];
                 Samples[i]+=m_Temp;
                 Samples[i+SampleCount]=m_Even-m_Temp;
             }
@@ -296,15 +298,15 @@ namespace Plugin {
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));
         m_UsingSamples=true;
         if(m_Samples.size()<m_Width) m_Samples.resize(m_Width,0);
-        for(int i=0;i<m_Width;i++) m_HanningSamples[i]={m_Samples[i]*(0.54f-0.46f*cos(2*M_PI*i/(float)m_Width)),0};
-        m_Samples.erase(m_Samples.begin(),m_Samples.begin()+m_SampleRate*ElapsedTime.asSeconds()+10);
+        for(int i=0;i<m_Width;i++) m_HanningSamples[i]={m_Samples[i]*m_HanningCache[i],0};
+        m_Samples.erase(m_Samples.begin(),m_Samples.begin()+std::min(m_SampleRate*ElapsedTime.asSeconds()+10,(float)m_Samples.size()));
         m_UsingSamples=false;
         //FFT
         FFT(m_HanningSamples.data(),m_Width,log2(m_Width));
         m_Bars.clear();
         if(m_Logarithmic) {
             for(float i=0;i<m_Texture.getSize().x;i++) {
-                float Height=abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(i,m_Logarithm)/pow(m_Texture.getSize().x,m_Logarithm))])/100000000.f;
+                float Height=abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(i,m_Logarithm)/pow(m_Texture.getSize().x,m_Logarithm))])/20000000.f;
                 float ColorFade=1-(Height/m_Texture.getSize().y);
                 m_Bars.append({{i+.5f,m_Texture.getSize().y-.5f},m_BaseColor});
                 m_Bars.append({{i+.5f,m_Texture.getSize().y-(Height*m_Texture.getSize().y+.5f)},
