@@ -12,7 +12,15 @@ void Visualizer::render() {
 }
 void Visualizer::setRenderSize(sf::Vector2u Size) {
     for(int i=0;i<m_Plugins.size();i++) m_Plugins[i]->setRenderSize(Size);
+    m_View.setCenter({Size.x/2,Size.y/2});
+    m_Texture.setView(m_View);
+}
+void Visualizer::setOutputSize(sf::Vector2u Size,float Rotation,float Scaling) {
+    m_View.setRotation(Rotation);
+    m_View.setSize({Size.x,Size.y});
+    m_View.zoom(Scaling);
     m_Texture.create(Size.x,Size.y);
+    m_Texture.setView(m_View);
 }
 void Visualizer::inputSamples(std::vector<sf::Int16> Samples) {
     std::vector<sf::Int16> ModifiedSamples(Samples.size()/m_ChannelCount);

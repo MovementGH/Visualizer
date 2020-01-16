@@ -12,6 +12,7 @@ class Visualizer {
     void setStreamProperties(int SampleRate,int ChannelCount);
     void addPlugin(VisualizerPlugin* Plugin,VisualizerPluginSettings Settings);
     void setRenderSize(sf::Vector2u Size);
+    void setOutputSize(sf::Vector2u Size,float Rotation,float Scaling);
 
     const sf::Texture& getTexture();
     protected:
@@ -19,6 +20,7 @@ class Visualizer {
     std::vector<sf::Sprite> m_PluginSprites;
     std::vector<VisualizerPluginSettings> m_PluginSettings;
     sf::RenderTexture m_Texture;
+    sf::View m_View;
     int m_SampleRate,m_ChannelCount;
     sf::Clock m_Clock;
 };

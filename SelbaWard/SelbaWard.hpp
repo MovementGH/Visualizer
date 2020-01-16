@@ -48,8 +48,7 @@
 #include "SelbaWard/Starfield.cpp"
 #include "SelbaWard/TileMap.cpp"**/
 
-#include "Sprite3d.cpp"
-
-#include "Starfield.cpp"
+#include "Sprite3d.hpp"
+#include "Starfield.hpp"
 
 #endif // SELBAWARD_HPP

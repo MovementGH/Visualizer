@@ -211,9 +211,7 @@ namespace Plugin {
             }
             m_UsingSamples=false;
         }
-        //for(int i=0;i<m_RectTarget.size();i++) m_RectSize[i]=m_RectTarget[i];
         for(int i=0;i<m_RectTarget.size();i++) m_RectSize[i]-=(m_RectSize[i]-m_RectTarget[i])*m_ScaleSpeed*ElapsedTime.asSeconds();
-        //for(int i=0;i<m_RectTarget.size();i++) m_RectSize[i]=m_RectSize[i]-(m_RectSize[i]-m_RectTarget[i])*m_ScaleSpeed*ElapsedTime.asSeconds();
         m_Rects.clear();
         for(int i=0;i<m_Texture.getSize().x;i++) {
             int Size=0;
@@ -229,9 +227,6 @@ namespace Plugin {
         m_Texture.clear(sf::Color::Transparent);
         m_Texture.draw(m_Rects);
         m_Texture.display();
-    }
-    void Amplitude::setRenderSize(sf::Vector2u Size) {
-        VisualizerPlugin::setRenderSize(Size);
     }
     void Amplitude::inputSamples(std::vector<sf::Int16> Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(0.001));
@@ -252,14 +247,11 @@ namespace Plugin {
         m_UsingSamples=true;
         if(m_Samples.size()<m_Width) m_Samples.resize(m_Width,0);
         for(int i=0;i<m_Width;i++) m_Line[i]={{(float)(i*m_Texture.getSize().x)/(float)m_Width+.5f,(m_Texture.getSize().y/2)+(float)(m_Samples[i]*(0.54f-0.46f*cos(2*M_PI*i/(float)m_Width))*m_Texture.getSize().y/2)/32768.f+.5f},m_Color};
-        m_Samples.erase(m_Samples.begin(),m_Samples.begin()+m_SampleRate*ElapsedTime.asSeconds());
+        m_Samples.erase(m_Samples.begin(),m_Samples.begin()+std::min((float)m_Samples.size(),m_SampleRate*ElapsedTime.asSeconds()));
         m_UsingSamples=false;
         m_Texture.clear(sf::Color::Transparent);
         m_Texture.draw(m_Line);
         m_Texture.display();
-    }
-    void Hanning::setRenderSize(sf::Vector2u Size) {
-        VisualizerPlugin::setRenderSize(Size);
     }
     void Hanning::inputSamples(std::vector<sf::Int16> Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));
@@ -325,9 +317,6 @@ namespace Plugin {
         m_Texture.clear(sf::Color::Transparent);
         m_Texture.draw(m_Bars);
         m_Texture.display();
-    }
-    void Pitch::setRenderSize(sf::Vector2u Size) {
-        VisualizerPlugin::setRenderSize(Size);
     }
     void Pitch::inputSamples(std::vector<sf::Int16> Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));

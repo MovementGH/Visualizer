@@ -116,7 +116,6 @@ namespace Plugin {
         Amplitude(float ScaleSpeed,int Rects,int SamplesPerRect,sf::Color BaseColor,sf::Color PeakColor,int BaseHeight,float RefreshSpeed,int Smoothing);
 
         virtual void render(sf::Time ElapsedTime);
-        virtual void setRenderSize(sf::Vector2u Size);
         virtual void inputSamples(std::vector<sf::Int16> Samples);
 
         protected:
@@ -137,7 +136,6 @@ namespace Plugin {
         Hanning(int Width,sf::Color Color);
 
         virtual void render(sf::Time ElapsedTime);
-        virtual void setRenderSize(sf::Vector2u Size);
         virtual void inputSamples(std::vector<sf::Int16> Samples);
 
         protected:
@@ -155,7 +153,6 @@ namespace Plugin {
         Pitch(int Width,sf::Color BaseColor,sf::Color PeakColor,bool Logarithmic,float Logarithm);
 
         virtual void render(sf::Time ElapsedTime);
-        virtual void setRenderSize(sf::Vector2u Size);
         virtual void inputSamples(std::vector<sf::Int16> Samples);
 
         protected:
