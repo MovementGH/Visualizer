@@ -22,7 +22,7 @@ void Visualizer::setOutputSize(sf::Vector2u Size,float Rotation,float Scaling) {
     m_Texture.create(Size.x,Size.y);
     m_Texture.setView(m_View);
 }
-void Visualizer::inputSamples(std::vector<sf::Int16> Samples) {
+void Visualizer::inputSamples(std::vector<sf::Int16>& Samples) {
     std::vector<sf::Int16> ModifiedSamples(Samples.size()/m_ChannelCount);
     for(int i=0;i<m_Plugins.size();i++) {
         for(int i2=m_InputSettings[i].channel,i3=0;i2<Samples.size();i2+=m_ChannelCount,i3++) ModifiedSamples[i3]=Samples[i2]*m_InputSettings[i].volume;

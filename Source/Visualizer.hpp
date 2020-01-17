@@ -8,7 +8,7 @@ class Visualizer {
     public:
     Visualizer();
     void render();
-    void inputSamples(std::vector<sf::Int16> Samples);
+    void inputSamples(std::vector<sf::Int16>& Samples);
     void setStreamProperties(int SampleRate,int ChannelCount);
     void addPlugin(VisualizerPlugin* Plugin,VisualizerPluginInputSettings Input,std::vector<VisualizerPluginDisplaySettings> Display);
     void setRenderSize(sf::Vector2u Size);

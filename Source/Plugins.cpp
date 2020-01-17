@@ -5,7 +5,7 @@ VisualizerPluginDisplaySettings::VisualizerPluginDisplaySettings(sf::FloatRect P
 
 VisualizerPlugin::VisualizerPlugin() {}
 void VisualizerPlugin::render(sf::Time ElapsedTime) {}
-void VisualizerPlugin::inputSamples(std::vector<sf::Int16> Samples) {}
+void VisualizerPlugin::inputSamples(std::vector<sf::Int16>& Samples) {}
 void VisualizerPlugin::setRenderSize(sf::Vector2u Size) { 
     sf::ContextSettings Settings;
     Settings.antialiasingLevel=8;
@@ -26,7 +26,6 @@ namespace Plugin {
         m_Circle.setRadius(0);
     }
     void VolumeCircle::render(sf::Time ElapsedTime) {
-        if(ElapsedTime.asSeconds()<.0001) ElapsedTime=sf::seconds(0.0001);
         m_Texture.clear(sf::Color::Transparent);
         m_Circle.setRadius(m_Circle.getRadius()-(m_Circle.getRadius()-m_TargetSize)*m_Speed*ElapsedTime.asSeconds());
         m_Circle.setOrigin(m_Circle.getRadius(),m_Circle.getRadius());
@@ -37,9 +36,9 @@ namespace Plugin {
         VisualizerPlugin::setRenderSize(Size);
         m_Circle.setPosition(Size.x/2,Size.y/2);
     }
-    void VolumeCircle::inputSamples(std::vector<sf::Int16> Samples) {
-        float Avg=0;
-        for(int i=0;i<Samples.size();i++) Avg+=(float)(abs(Samples[i])*std::min(m_Texture.getSize().x,m_Texture.getSize().y))/(float)(32768.f*Samples.size());
+    void VolumeCircle::inputSamples(std::vector<sf::Int16>& Samples) {
+        float Avg=0,Multiplier=(float)std::min(m_Texture.getSize().x,m_Texture.getSize().y)/(float)(32768.f*Samples.size());
+        for(int i=0;i<Samples.size();i++) Avg+=abs(Samples[i])*Multiplier;
         m_TargetSize=Avg;
     }
 
@@ -107,7 +106,7 @@ namespace Plugin {
         VisualizerPlugin::setRenderSize(Size);
         m_Circles.clear();
     }
-    void ConfettiCircles::inputSamples(std::vector<sf::Int16> Samples) {
+    void ConfettiCircles::inputSamples(std::vector<sf::Int16>& Samples) {
         while(m_UsingSamples) {sf::sleep(sf::seconds(.001));}
         m_UsingSamples=true;
         m_Samples.insert(m_Samples.end(),Samples.begin(),Samples.end());
@@ -176,7 +175,7 @@ namespace Plugin {
         VisualizerPlugin::setRenderSize(Size);
         m_Lasers.clear();
     }
-    void Lasers::inputSamples(std::vector<sf::Int16> Samples) {
+    void Lasers::inputSamples(std::vector<sf::Int16>& Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));
         m_UsingSamples=true;
         m_Samples.insert(m_Samples.end(),Samples.begin(),Samples.end());
@@ -194,6 +193,12 @@ namespace Plugin {
         m_Rects.setPrimitiveType(sf::Lines);
         m_Samples.resize(Rects*SamplesPerRect,0);
     }
+    void Amplitude::setRenderSize(sf::Vector2u Size) {
+        VisualizerPlugin::setRenderSize(Size);
+        m_Rects.resize(m_Texture.getSize().x*2);
+        for(int i=0;i<m_Texture.getSize().x;i++)
+            m_Rects[i*2]={{i+.5f,m_Texture.getSize().y+.5f},m_BaseColor};
+    }
     void Amplitude::render(sf::Time ElapsedTime) {
         if(m_RefreshClock.getElapsedTime().asSeconds()>m_RefreshSpeed) {
             while(m_UsingSamples) sf::sleep(sf::seconds(0.001));
@@ -208,23 +213,21 @@ namespace Plugin {
             m_UsingSamples=false;
         }
         for(int i=0;i<m_RectTarget.size();i++) m_RectSize[i]-=(m_RectSize[i]-m_RectTarget[i])*m_ScaleSpeed*ElapsedTime.asSeconds();
-        m_Rects.clear();
         for(int i=0;i<m_Texture.getSize().x;i++) {
             int Size=0;
-            for(int i2=-m_Smoothing;i2<=m_Smoothing;i2++) Size+=m_RectSize[std::max(0.f,std::min(m_RectSize.size()-1.f,(float)i*(float)m_RectSize.size()/(float)m_Texture.getSize().x))+i2]/(m_Smoothing*2+1);
+            for(int i2=-m_Smoothing;i2<=m_Smoothing;i2++) Size+=m_RectSize[std::max(0.f,std::min(m_RectSize.size()-1.f,(float)(i*m_RectSize.size())/(float)m_Texture.getSize().x+i2))]/(m_Smoothing*2+1);
             sf::Vector2f Base={i+.5f,m_Texture.getSize().y+.5f},Peak={i+.5f,m_Texture.getSize().y-m_BaseHeight-Size+.5f};
             float ColorFade=1-(Peak.y/m_Texture.getSize().y);
-            m_Rects.append({Base,m_BaseColor});
-            m_Rects.append({Peak,{m_BaseColor.r-(m_BaseColor.r-m_PeakColor.r)*ColorFade,
+            m_Rects[i*2+1]={Peak,{m_BaseColor.r-(m_BaseColor.r-m_PeakColor.r)*ColorFade,
                                   m_BaseColor.g-(m_BaseColor.g-m_PeakColor.g)*ColorFade,
                                   m_BaseColor.b-(m_BaseColor.b-m_PeakColor.b)*ColorFade,
-                                  m_BaseColor.a-(m_BaseColor.a-m_PeakColor.a)*ColorFade}});                
+                                  m_BaseColor.a-(m_BaseColor.a-m_PeakColor.a)*ColorFade}};
         }
         m_Texture.clear(sf::Color::Transparent);
         m_Texture.draw(m_Rects);
         m_Texture.display();
     }
-    void Amplitude::inputSamples(std::vector<sf::Int16> Samples) {
+    void Amplitude::inputSamples(std::vector<sf::Int16>& Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(0.001));
         m_UsingSamples=true;
         std::size_t Size=m_Samples.size();
@@ -252,7 +255,7 @@ namespace Plugin {
         m_Texture.draw(m_Line);
         m_Texture.display();
     }
-    void Hanning::inputSamples(std::vector<sf::Int16> Samples) {
+    void Hanning::inputSamples(std::vector<sf::Int16>& Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));
         m_UsingSamples=true;
         m_Samples.insert(m_Samples.end(),Samples.begin(),Samples.end());
@@ -272,16 +275,18 @@ namespace Plugin {
         for(int i=0;i<m_Width;i++)
             m_HanningCache[i]=(0.54f-0.46f*cos(2*M_PI*i/(float)m_Width));
     }
-
-    void Pitch::Sort(std::complex<float>* Samples,int SampleCount) {
-        for(int i=0;i<SampleCount;i++) m_TempV[i]=Samples[i*2+1];
-        for(int i=0;i<SampleCount;i++) Samples[i]=Samples[i*2];
-        for(int i=0;i<SampleCount;i++) Samples[i+SampleCount]=m_TempV[i];
+    void Pitch::setRenderSize(sf::Vector2u Size) {
+        VisualizerPlugin::setRenderSize(Size);
+        m_Bars.resize(m_Texture.getSize().x*2);
+        for(int i=0;i<m_Texture.getSize().x;i++)
+            m_Bars[i*2]={{i+.5f,m_Texture.getSize().y-.5f},m_BaseColor};
     }
     void Pitch::FFT(std::complex<float>* Samples,int SampleCount,int SampleCountLogarithm) {
         if(SampleCount>1) {
             SampleCount/=2;
-            Sort(&Samples[0],SampleCount);
+            for(int i=0;i<SampleCount;i++) m_TempV[i]=Samples[i*2+1];
+            for(int i=0;i<SampleCount;i++) Samples[i]=Samples[i*2];
+            for(int i=0;i<SampleCount;i++) Samples[i+SampleCount]=m_TempV[i];
             FFT(&Samples[0],SampleCount,SampleCountLogarithm-1);
             FFT(&Samples[0]+SampleCount,SampleCount,SampleCountLogarithm-1);
             for(int i=0;i<SampleCount;i++) {
@@ -292,7 +297,6 @@ namespace Plugin {
             }
         }
     }
-
     void Pitch::render(sf::Time ElapsedTime) {
         //Hanning Window
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));
@@ -303,24 +307,23 @@ namespace Plugin {
         m_UsingSamples=false;
         //FFT
         FFT(m_HanningSamples.data(),m_Width,log2(m_Width));
-        m_Bars.clear();
         if(m_Logarithmic) {
+            float Height,ColorFade;
             for(float i=0;i<m_Texture.getSize().x;i++) {
-                float Height=abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(i,m_Logarithm)/pow(m_Texture.getSize().x,m_Logarithm))])/20000000.f;
-                float ColorFade=1-(Height/m_Texture.getSize().y);
-                m_Bars.append({{i+.5f,m_Texture.getSize().y-.5f},m_BaseColor});
-                m_Bars.append({{i+.5f,m_Texture.getSize().y-(Height*m_Texture.getSize().y+.5f)},
+                Height=abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(i,m_Logarithm)/pow(m_Texture.getSize().x,m_Logarithm))])/20000000.f;
+                ColorFade=1-(Height/m_Texture.getSize().y);
+                m_Bars[i*2+1]={{i+.5f,m_Texture.getSize().y-(Height*m_Texture.getSize().y+.5f)},
                                {m_BaseColor.r-(m_BaseColor.r-m_PeakColor.r)*ColorFade,
                                 m_BaseColor.g-(m_BaseColor.g-m_PeakColor.g)*ColorFade,
                                 m_BaseColor.b-(m_BaseColor.b-m_PeakColor.b)*ColorFade,
-                                m_BaseColor.a-(m_BaseColor.a-m_PeakColor.a)*ColorFade}});
+                                m_BaseColor.a-(m_BaseColor.a-m_PeakColor.a)*ColorFade}};
             }
         } else std::cout<<"Not supported yet"<<std::endl;
         m_Texture.clear(sf::Color::Transparent);
         m_Texture.draw(m_Bars);
         m_Texture.display();
     }
-    void Pitch::inputSamples(std::vector<sf::Int16> Samples) {
+    void Pitch::inputSamples(std::vector<sf::Int16>& Samples) {
         while(m_UsingSamples) sf::sleep(sf::seconds(.001));
         m_UsingSamples=true;
         m_Samples.insert(m_Samples.end(),Samples.begin(),Samples.end());

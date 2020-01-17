@@ -23,7 +23,7 @@ class VisualizerPlugin {
     virtual void render(sf::Time ElapsedTime);
     virtual void setRenderSize(sf::Vector2u Size);
     virtual void setStreamProperties(int SampleRate,int ChannelCount);
-    virtual void inputSamples(std::vector<sf::Int16> Samples);
+    virtual void inputSamples(std::vector<sf::Int16>& Samples);
 
     const sf::Texture& getTexture();
     
@@ -39,7 +39,7 @@ namespace Plugin {
 
         virtual void render(sf::Time ElapsedTime);
         virtual void setRenderSize(sf::Vector2u Size);
-        virtual void inputSamples(std::vector<sf::Int16> Samples);
+        virtual void inputSamples(std::vector<sf::Int16>& Samples);
 
         protected:
         sf::CircleShape m_Circle;
@@ -63,7 +63,7 @@ namespace Plugin {
         
         virtual void render(sf::Time ElapsedTime);
         virtual void setRenderSize(sf::Vector2u Size);
-        virtual void inputSamples(std::vector<sf::Int16> Samples);
+        virtual void inputSamples(std::vector<sf::Int16>& Samples);
 
         protected:
         std::vector<ConfettiCircle> m_Circles;
@@ -96,7 +96,7 @@ namespace Plugin {
 
         virtual void render(sf::Time ElapsedTime);
         virtual void setRenderSize(sf::Vector2u Size);
-        virtual void inputSamples(std::vector<sf::Int16> Samples);
+        virtual void inputSamples(std::vector<sf::Int16>& Samples);
         
         protected:
         std::vector<Laser> m_Lasers;
@@ -118,7 +118,8 @@ namespace Plugin {
         Amplitude(float ScaleSpeed,int Rects,int SamplesPerRect,sf::Color BaseColor,sf::Color PeakColor,int BaseHeight,float RefreshSpeed,int Smoothing);
 
         virtual void render(sf::Time ElapsedTime);
-        virtual void inputSamples(std::vector<sf::Int16> Samples);
+        virtual void inputSamples(std::vector<sf::Int16>& Samples);
+        virtual void setRenderSize(sf::Vector2u Size);
 
         protected:
         float m_ScaleSpeed,m_RefreshSpeed;
@@ -138,7 +139,7 @@ namespace Plugin {
         Hanning(int Width,sf::Color Color);
 
         virtual void render(sf::Time ElapsedTime);
-        virtual void inputSamples(std::vector<sf::Int16> Samples);
+        virtual void inputSamples(std::vector<sf::Int16>& Samples);
 
         protected:
         bool m_UsingSamples;
@@ -156,7 +157,8 @@ namespace Plugin {
         Pitch(int Width,sf::Color BaseColor,sf::Color PeakColor,bool Logarithmic,float Logarithm);
 
         virtual void render(sf::Time ElapsedTime);
-        virtual void inputSamples(std::vector<sf::Int16> Samples);
+        virtual void inputSamples(std::vector<sf::Int16>& Samples);
+        virtual void setRenderSize(sf::Vector2u Size);
 
         protected:
         bool m_Logarithmic,m_UsingSamples;
@@ -164,7 +166,6 @@ namespace Plugin {
         float m_Logarithm;
         sf::Color m_BaseColor,m_PeakColor;
 
-        void Sort(std::complex<float>* Samples,int SampleCount);
         void FFT(std::complex<float>* Samples,int SampleCount,int SampleCountLogarithm);
 
         std::complex<float> m_Even,m_Temp;
