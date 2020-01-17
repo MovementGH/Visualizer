@@ -249,7 +249,7 @@ namespace Plugin {
         m_UsingSamples=true;
         if(m_Samples.size()<m_Width) m_Samples.resize(m_Width,0);
         for(int i=0;i<m_Width;i++) m_Line[i]={{(float)(i*m_Texture.getSize().x)/(float)m_Width+.5f,(m_Texture.getSize().y/2)+(float)(m_Samples[i]*m_HanningCache[i]*m_Texture.getSize().y/2)/32768.f+.5f},m_Color};
-        m_Samples.erase(m_Samples.begin(),m_Samples.begin()+std::min((float)m_Samples.size(),m_SampleRate*ElapsedTime.asSeconds()));
+        m_Samples.erase(m_Samples.begin(),m_Samples.begin()+std::min(m_SampleRate*ElapsedTime.asSeconds()+10,(float)m_Samples.size()));
         m_UsingSamples=false;
         m_Texture.clear(sf::Color::Transparent);
         m_Texture.draw(m_Line);
