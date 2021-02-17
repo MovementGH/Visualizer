@@ -307,16 +307,17 @@ namespace Plugin {
         m_UsingSamples=false;
         //FFT
         FFT(m_HanningSamples.data(),m_Width,log2(m_Width));
+        for(int i=0;i<m_HanningSamples.size();i++)
+            m_HanningSamples[i]*=log2(i)*1.709511291351455d;
         if(m_Logarithmic) {
-            float Height,ColorFade;
+            float Height;
             for(float i=0;i<m_Texture.getSize().x;i++) {
-                Height=abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(i,m_Logarithm)/pow(m_Texture.getSize().x,m_Logarithm))])/20000000.f;
-                ColorFade=1-(Height/m_Texture.getSize().y);
+                Height=2*pow(abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(2,1+i*6/m_Texture.getSize().x)/1024.f)])/80000000.f,2);
                 m_Bars[i*2+1]={{i+.5f,m_Texture.getSize().y-(Height*m_Texture.getSize().y+.5f)},
-                               {m_BaseColor.r-(m_BaseColor.r-m_PeakColor.r)*ColorFade,
-                                m_BaseColor.g-(m_BaseColor.g-m_PeakColor.g)*ColorFade,
-                                m_BaseColor.b-(m_BaseColor.b-m_PeakColor.b)*ColorFade,
-                                m_BaseColor.a-(m_BaseColor.a-m_PeakColor.a)*ColorFade}};
+                               {m_BaseColor.r-(float)(m_BaseColor.r-m_PeakColor.r)*Height,
+                                m_BaseColor.g-(float)(m_BaseColor.g-m_PeakColor.g)*Height,
+                                m_BaseColor.b-(float)(m_BaseColor.b-m_PeakColor.b)*Height,
+                                m_BaseColor.a-(float)(m_BaseColor.a-m_PeakColor.a)*Height}};
             }
         } else std::cout<<"Not supported yet"<<std::endl;
         m_Texture.clear(sf::Color::Transparent);
