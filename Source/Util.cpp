@@ -113,6 +113,8 @@ namespace selbaward {
             m_StarMovingRight[i]=m_Vertices[i].position.x<m_Size.x/2;
             m_StarMovingDown[i]=m_Vertices[i].position.y<m_Size.y/2;
         }
+        for(int i=0;i<500;i++)
+            move(3);
     }
     void WarpField::setSize(sf::Vector2f Size) {
         m_Size=Size;
