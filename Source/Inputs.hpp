@@ -7,9 +7,11 @@ class LiveVisualizer : public Visualizer,public sf::SoundBufferRecorder {
     public:
     void Play(unsigned int sampleRate=44100);
     void Stop();
+    void setAmplification(float Amplification);
     private:
     virtual bool onProcessSamples(const sf::Int16* samples,std::size_t sampleCount);
     std::vector<sf::Int16> m_Samples;
+    float m_Amplification=1;
 };
 
 #endif
