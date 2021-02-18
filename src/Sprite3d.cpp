@@ -32,7 +32,7 @@
 
 
 
-#include "Sprite3d.hpp"
+#include <Sprite3d.hpp>
 
 #include <cmath>
 
@@ -640,9 +640,9 @@ unsigned int Sprite3d::getNumberOfVerticesNeededForCurrentSubdividedMeshDensity(
 
 	= (2m + 3)(m + 1) + 1
 
-	= (2m² + 3m + 2m + 3) + 1
+	= (2mï¿½ + 3m + 2m + 3) + 1
 
-	= 2m² + 5m + 4
+	= 2mï¿½ + 5m + 4
 
 	= m(2m + 5) + 4
 	*/

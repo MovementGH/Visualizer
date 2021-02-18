@@ -2,7 +2,7 @@
 #define Visualizer_h
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include "Plugins.hpp"
+#include <Plugins.hpp>
 
 class Visualizer {
     public:

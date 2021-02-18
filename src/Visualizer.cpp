@@ -1,4 +1,4 @@
-#include "Visualizer.hpp"
+#include <Visualizer.hpp>
 
 Visualizer::Visualizer():m_SampleRate(44100),m_ChannelCount(2){ m_Clock.restart(); }
 void Visualizer::render() {

@@ -1,3 +1,6 @@
 .vscode
 DerivedData
 *.xcodeproj
+src/obj
+build
+demo/visualizer

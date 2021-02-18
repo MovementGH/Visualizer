@@ -1,4 +1,4 @@
-#include "Plugins.hpp"
+#include <Plugins.hpp>
 
 VisualizerPluginInputSettings::VisualizerPluginInputSettings(int Channel,float Volume):channel(Channel),volume(Volume){}
 VisualizerPluginDisplaySettings::VisualizerPluginDisplaySettings(sf::FloatRect Position,float Rotation):position(Position),rotation(Rotation){}
@@ -309,10 +309,11 @@ namespace Plugin {
         FFT(m_HanningSamples.data(),m_Width,log2(m_Width));
         for(int i=0;i<m_HanningSamples.size();i++)
             m_HanningSamples[i]*=log2(i)*1.709511291351455d;
+        
         if(m_Logarithmic) {
             float Height;
             for(float i=0;i<m_Texture.getSize().x;i++) {
-                Height=2*pow(abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(2,1+i*6/m_Texture.getSize().x)/1024.f)])/80000000.f,2);
+                Height=2*pow(abs(m_HanningSamples[(int)(m_HanningSamples.size()/2.f*pow(2,1+i*6/m_Texture.getSize().x)/1024.f)])/160000000.f,2);
                 m_Bars[i*2+1]={{i+.5f,m_Texture.getSize().y-(Height*m_Texture.getSize().y+.5f)},
                                {m_BaseColor.r-(float)(m_BaseColor.r-m_PeakColor.r)*Height,
                                 m_BaseColor.g-(float)(m_BaseColor.g-m_PeakColor.g)*Height,

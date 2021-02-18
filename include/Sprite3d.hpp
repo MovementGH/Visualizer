@@ -33,13 +33,8 @@
 #ifndef SELBAWARD_SPRITE3D_HPP
 #define SELBAWARD_SPRITE3D_HPP
 
-#include "Common.hpp"
-#include <SFML/Graphics/PrimitiveType.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/Sprite.hpp> // to construct from sf::Sprite
+#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
 
 namespace selbaward
 {
@@ -191,4 +186,7 @@ private:
 };
 
 } // namespace selbaward
+
+namespace sw=selbaward;
+
 #endif // SELBAWARD_SPRITE3D_HPP
