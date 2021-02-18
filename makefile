@@ -12,3 +12,6 @@ demo:
 
 install:
 	+$(MAKE) install -C src
+
+uninstall:
+	+$(MAKE) uninstall -C src

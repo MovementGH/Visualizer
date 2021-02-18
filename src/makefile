@@ -33,5 +33,9 @@ install: libvisualizer.so
 	cp $(IDIR)/* /usr/local/include
 	cp $(BDIR)/* /usr/local/lib
 
+uninstall:
+	rm -f /usr/local/lib/libvisualizer.so
+	rm -f `fdupes --omitfirst ../include /usr/local/include`
+
 demo: $(OBJ) $(ODIR)/main.o
 	$(CC) -o $(DDIR)/visualizer $^ $(CFLAGS) $(LIBS)
