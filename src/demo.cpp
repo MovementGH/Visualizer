@@ -10,12 +10,11 @@ int main(int argc,char** argv) {
     sf::RenderWindow Window;
     sf::ContextSettings Settings;
     Settings.antialiasingLevel=8;
-    Window.create(sf::VideoMode(Size.x,Size.y),"Test",sf::Style::Default,Settings);
+    Window.create(sf::VideoMode(Size.x,Size.y),"Visualizer Demo",sf::Style::Default,Settings);
     Window.setVerticalSyncEnabled(true);
 
     LiveVisualizer Visualizer;
     Visualizer.setDevice(Visualizer.getAvailableDevices()[Input]);
-    std::cout<<"Recording from "<<Visualizer.getAvailableDevices()[Input]<<std::endl;
     Visualizer.setAmplification(argc>2?std::atoi(argv[2]):1.f);
     Visualizer.setRenderSize(Size/(unsigned)2);
     Visualizer.setOutputSize({Size.y/2,Size.x/2},90,1);
