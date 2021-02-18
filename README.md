@@ -1,3 +1,7 @@
+# Dependancies
+
+SFML must be installed to build and run this library
+
 # Building
 
 `make` to build
