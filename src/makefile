@@ -33,7 +33,7 @@ prep:
 build: $(OBJ)
 	$(CC) -shared -o $(BDIR)/libvisualizer.so $^ $(CFLAGS) $(LIBS)
 
-build-demo: $(OBJ) $(ODIR)/main.o
+build-demo: $(OBJ) $(ODIR)/demo.o
 	$(CC) -o $(DDIR)/visualizer $^ $(CFLAGS) $(LIBS)
 
 clean:

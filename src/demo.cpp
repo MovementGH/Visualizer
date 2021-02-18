@@ -20,7 +20,7 @@ int main(int argc,char** argv) {
     Visualizer.setRenderSize(Size/(unsigned)2);
     Visualizer.setOutputSize({Size.y/2,Size.x/2},90,1);
     Visualizer.addPlugin(new Plugin::ConfettiCircles({1,10},{15,85},{.1,1},{sf::Color::White,{0,0,0,0}},{{255,255,255},{0,0,0,0}},{0,0},{99,0},{1,4},1.2,10),{0,1},{{{0,0,Size.x/2,Size.y/2},0}});
-    Visualizer.addPlugin(new Plugin::Lasers(1.2,{1,0},{1,0},{2,0},{2,0},{sf::Color::White,{0,0,0,0}},10,"Product/Grad.png"),{0,2},{{{0,0,Size.x/2,Size.y/2},0}});
+    Visualizer.addPlugin(new Plugin::Lasers(1.2,{1,0},{1,0},{2,0},{2,0},{sf::Color::White,{0,0,0,0}},10,"Grad.png"),{0,2},{{{0,0,Size.x/2,Size.y/2},0}});
     Visualizer.addPlugin(new Plugin::VolumeCircle(4,sf::Color::Black,{255,255,255,255},2),{0,1},{{{-(int)Size.y/4,0,Size.y/2,Size.y/2},0},{{Size.x/2-Size.y/4,0,Size.y/2,Size.y/2},0}});
     Visualizer.addPlugin(new Plugin::VolumeCircle(2,sf::Color::Black,{255,255,255,255},2),{0,.5},{{{-(int)Size.y/4,0,Size.y/2,Size.y/2},0},{{Size.x/2-Size.y/4,0,Size.y/2,Size.y/2},0}});
     Visualizer.addPlugin(new Plugin::VolumeCircle(1,sf::Color::Black,{255,255,255,255},2),{0,.25},{{{-(int)Size.y/4,0,Size.y/2,Size.y/2},0},{{Size.x/2-Size.y/4,0,Size.y/2,Size.y/2},0}});
