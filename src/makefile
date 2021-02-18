@@ -1,5 +1,6 @@
+
 CC=g++
-CFLAGS=-Ofast -fPIC -I$(IDIR)
+CFLAGS=-Ofast -fPIC -I$(IDIR) -w
 
 IDIR=../include
 ODIR=obj
@@ -15,27 +16,37 @@ _OBJ = Inputs.o Plugins.o Util.o Visualizer.o Sprite3d.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	mkdir -p $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-libvisualizer.so: $(OBJ)
-	mkdir -p $(BDIR)
-	$(CC) -shared -o $(BDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
-.PHONY: clean demo install
+.PHONY: clean demo install prep
+.SECONDARY: build build-demo
+
+all: prep build
+
+demo: prep build-demo
+
+prep:
+	mkdir -p $(ODIR)
+	mkdir -p $(BDIR)
+
+build: $(OBJ)
+	$(CC) -shared -o $(BDIR)/libvisualizer.so $^ $(CFLAGS) $(LIBS)
+
+build-demo: $(OBJ) $(ODIR)/main.o
+	$(CC) -o $(DDIR)/visualizer $^ $(CFLAGS) $(LIBS)
 
 clean:
 	rm -rf $(ODIR)
 	rm -rf $(BDIR)
 	rm -rf $(DDIR)/visualizer
 
-install: libvisualizer.so
+install: prep build
 	cp $(IDIR)/* /usr/local/include
 	cp $(BDIR)/* /usr/local/lib
+	ldconfig
 
 uninstall:
 	rm -f /usr/local/lib/libvisualizer.so
 	rm -f `fdupes --omitfirst ../include /usr/local/include`
-
-demo: $(OBJ) $(ODIR)/main.o
-	$(CC) -o $(DDIR)/visualizer $^ $(CFLAGS) $(LIBS)
+	ldconfig

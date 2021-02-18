@@ -1,5 +1,5 @@
 
-.PHONY: clean demo install
+.PHONY: clean demo install uninstall
 
 all:
 	+$(MAKE) -C src
