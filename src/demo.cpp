@@ -2,14 +2,14 @@
 #include <Inputs.hpp>
 
 int main(int argc,char** argv) {
-    sf::Vector2u Size(1920,1080);
+    sf::Vector2u Size(sf::VideoMode::getDesktopMode().width,sf::VideoMode::getDesktopMode().height);
     int Input=0;
     if(argc>1)
         Input=std::atoi(argv[1]);
 
     sf::RenderWindow Window;
     sf::ContextSettings Settings;
-    Settings.antialiasingLevel=8;
+    Settings.antialiasingLevel=4;
     Window.create(sf::VideoMode(Size.x,Size.y),"Visualizer Demo",sf::Style::Default,Settings);
     Window.setVerticalSyncEnabled(true);
 
